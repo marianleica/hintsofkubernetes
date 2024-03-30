@@ -1,0 +1,218 @@
+# credits: killercoda.com
+# take a sample hobby.yaml:
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    level: hobby
+  name: hobby-project
+spec:
+  containers:
+  - image: nginx:alpine
+    name: c
+
+# let's say the pod should be preferred to be only scheduled on Nodes where Pods with label "level=restricted" are running.
+
+# for the "topologyKey" use "kubernetes.io/hostname".
+# assuming there are no taints on any Nodes which means no tolerations are needed
+
+# docs: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node
+
+# look for "Inter-pod affinity and anti-affinity
+
+# have already a pod running with yaml:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    cni.projectcalico.org/containerID: c73ea3ddbe547b574a489215e9146bef3aace2b634bae5209b867c0c30817bf4
+    cni.projectcalico.org/podIP: 192.168.1.4/32
+    cni.projectcalico.org/podIPs: 192.168.1.4/32
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"level":"restricted"},"name":"restricted","namespace":"default"},"spec":{"containers":[{"image":"nginx:alpine","name":"c"}],"nodeName":"node01"}}
+  creationTimestamp: "2024-03-30T12:52:16Z"
+  labels:
+    level: restricted
+  name: restricted
+  namespace: default
+  resourceVersion: "4354"
+  uid: 2992af64-8bf7-4208-af62-69ecd9b1e272
+spec:
+  containers:
+  - image: nginx:alpine
+    imagePullPolicy: IfNotPresent
+    name: c
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-ddmxh
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: node01
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-ddmxh
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2024-03-30T12:52:20Z"
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2024-03-30T12:52:16Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2024-03-30T12:52:20Z"
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2024-03-30T12:52:20Z"
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2024-03-30T12:52:16Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://b72d2279ded9ae67cda3ba2475fb6d76e16f137c90052d0b69fa8157f52ceebe
+    image: docker.io/library/nginx:alpine
+    imageID: docker.io/library/nginx@sha256:31bad00311cb5eeb8a6648beadcf67277a175da89989f14727420a80e2e76742
+    lastState: {}
+    name: c
+    ready: true
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2024-03-30T12:52:19Z"
+  hostIP: 172.30.2.2
+  hostIPs:
+  - ip: 172.30.2.2
+  phase: Running
+  podIP: 192.168.1.4
+  podIPs:
+  - ip: 192.168.1.4
+  qosClass: BestEffort
+  startTime: "2024-03-30T12:52:16Z"
+
+# find the pod and see its labels
+kubectl get pod --show-labels
+
+# implement the solution using "preferredDuringSchedulingIgnoredDuringExecution:
+
+spec:
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+
+# the new pod yaml should be:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    level: hobby
+  name: hobby-project
+spec:
+  containers:
+  - image: nginx:alpine
+    name: c
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: level
+              operator: In
+              values:
+              - restricted
+          topologyKey: topology.kubernetes.io/zone
+
+# inspired from https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#an-example-of-a-pod-that-uses-pod-affinity
+
+# the label selector is with matchExpressions to match the labels of the other pod we would like to have affinity with:
+
+  labels:
+    level: restricted
+
+# then create the pod
+
+kubectl apply -f hobby.yaml
+
+# we should see the new pod "hobby-project" on the same node as the other "retricted" pod
+
+kubectl get pod -owide --show-labels
+
+NAME            READY   STATUS    RESTARTS   AGE   IP            NODE     NOMINATED NODE   READINESS GATES   LABELS
+hobby-project   1/1     Running   0          62s   192.168.1.5   node01   <none>           <none>            level=hobby
+restricted      1/1     Running   0          29m   192.168.1.4   node01   <none>           <none>            level=restricted
+
+# now changing the node to be the controlplane node
+
+# for this delete the existing pod:
+kubectl delete pod restricted --force --grace-period 0
+
+# create it again on the controlplane:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    level: restricted
+  name: restricted
+spec:
+  nodeName: controlplane
+  containers:
+  - image: nginx:alpine
+    name: c
+
+kubectl delete -f hobby.yaml --force
+
+kubectl apply -f newhobby.yaml
+
+# we should see it on the controlplane now
+
+kubectl get pods -o wide --show-labels
+
+NAME         READY   STATUS    RESTARTS   AGE   IP            NODE           NOMINATED NODE   READINESS GATES   LABELS
+restricted   1/1     Running   0          10s   192.168.0.4   controlplane   <none>           <none>            level=restricted

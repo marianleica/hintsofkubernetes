@@ -1,0 +1,22 @@
+# add the control plane node name in the spec.nodeName section
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    level: restricted
+  name: restricted
+spec:
+  nodeName: controlplane
+  containers:
+  - image: nginx:alpine
+    name: c
+
+kubectl apply -f newhobby.yaml
+
+# we should see it on the controlplane now
+
+kubectl get pods -o wide --show-labels
+
+NAME         READY   STATUS    RESTARTS   AGE   IP            NODE           NOMINATED NODE   READINESS GATES   LABELS
+restricted   1/1     Running   0          10s   192.168.0.4   controlplane   <none>           <none>            level=restricted

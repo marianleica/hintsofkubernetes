@@ -1,0 +1,43 @@
+# credits: killercoda.com
+# Kubernetes vesrions are expressed as x.y.z, where x is the major version, y is the minor version, and z is thepatch version
+# https://kubernetes.io/releases/version-skew-policy
+# see the current versions
+kubectl get node
+kubectl version
+# kubeadm upgrade -h
+# install the correct kubeadm version:
+# show available versions
+apt-cache show kubeadm
+
+# ssh into control plane
+# see possible versions
+kubeadm upgrade plan
+
+# show available versions
+apt-cache show kubeadm
+
+# can be different for you
+apt-get install kubeadm=1.29.2-1.1
+
+# could be different version for you,it can also some time to finish
+kubeadm upgrade apply v1.29.2
+
+# next update kubectl and kubelet
+# can be a different version for you
+apt-get install kubectl=1.29.2-1.1 kubelet=1.29.2-1.1
+
+service kubelet restart
+# now the control plane is showing upgraded
+
+# upgrade remaining nodes with the same version as the control plane
+ssh node01
+apt-get install kubeadm=1.29.2-1.1
+kubeadm upgrade node
+
+# next we update kubectl and kubelet
+ssh node01
+# can be a different version for you
+apt-get install kubelet=1.29.2-1.1
+service kubelet restart
+
+
