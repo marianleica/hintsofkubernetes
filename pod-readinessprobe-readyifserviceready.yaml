@@ -1,0 +1,37 @@
+# Use context: kubectl config use-context k8s-c1-H
+# Do the following in Namespace default. Create a single Pod named ready-if-service-ready of image nginx:1.16.1-alpine. Configure a LivenessProbe which simply executes command true. Also configure a ReadinessProbe which does check if the url http://service-am-i-ready:80 is reachable, you can use wget -T2 -O- http://service-am-i-ready:80 for this. Start the Pod and confirm it isn't ready because of the ReadinessProbe.
+# Create a second Pod named am-i-ready of image nginx:1.16.1-alpine with label id: cross-server-ready. The already existing Service service-am-i-ready should now have that second Pod as endpoint.
+# Now the first Pod should be in ready state, confirm that
+
+# The pod failing with ReadinessProbe because the service is not created
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: ready-if-service-ready
+  name: ready-if-service-ready
+spec:
+  containers:
+  - image: nginx:1.16.1-alpine
+    name: ready-if-service-ready
+    resources: {}
+    livenessProbe:
+      exec:
+        command:
+        - 'true'
+      initialDelaySeconds: 5
+      periodSeconds: 5
+    readinessProbe:
+      exec:
+        command:
+        - sh
+        - -c
+        - 'wget -T2 -0- http://service-am-i-ready:80'
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+# The serivce service-am-i-ready is already there provided by the exercise with label "id: cross-server-ready"
+# The second pod should be a basic one just having the label with "id: cross-sever-ready"
+# Once the second pod is deployed, the first pod is reaching ready running state
