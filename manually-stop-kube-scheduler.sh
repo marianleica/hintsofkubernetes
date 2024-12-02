@@ -16,6 +16,7 @@ kubectl run pod1 --image=httpd:2.4-alpine
 k get pod pod1 -o yaml > new.yaml
 
 # new.yaml
+
 apiVersion: v1
 kind: Pod
 metadata:
@@ -47,6 +48,7 @@ spec:
       readOnly: true
   dnsPolicy: ClusterFirst
 ...
+
 
 # The only thing a scheduler does, is that it sets the nodeName for a Pod declaration
 # How it finds the correct node to schedule on, that's a very much complicated matter and takes many variables into account
