@@ -1,6 +1,6 @@
 <p> To interact with the etcd datastore in Kubernetes, we use a command-line tool called etcdctl</p>
 
-    etcd has its own server certificate which requires a valid client certificate and key located in /etc/kubernetes/pki/etcd 
+<p>etcd has its own server certificate which requires a valid client certificate and key located in /etc/kubernetes/pki/etcd </p>
 
 <p> Just like the Kubernetes API, the etcd datastore requires authenticaiton which can be passed as a parameter with the etcdctl tool. etcdctl also requires environment variable ETCDCTL_API which is set to the version of etcdctl</p>
 
