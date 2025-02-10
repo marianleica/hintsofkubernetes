@@ -1,0 +1,18 @@
+# Setting variables
+$RG = "AKSTESTS"
+$AKS = "akstst"
+
+# Install the required extension
+az extension add --upgrade --name k8s-extension
+
+# Create resource group
+az group create --name $RG --location <location>
+
+# Create AKS cluster with ACS extension
+az aks create -n $AKS -g $RG --node-vm-size Standard_D4s_v3 --node-count 3 --enable-azure-container-storage azureDisk --generate-ssh-keys
+
+# Connect to the cluster
+az aks get-credentials -n $AKS -g $RG --admin
+
+# Display available storage pools
+kubectl get sp -n acstor
