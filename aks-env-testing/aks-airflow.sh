@@ -165,11 +165,9 @@ spec:
   secretStoreRef:
     kind: SecretStore
     name: azure-store
-
   target:
     name: ${AKS_AIRFLOW_LOGS_STORAGE_SECRET_NAME}
     creationPolicy: Owner
-
   data:
     # name of the SECRET in the Azure KV (no prefix is by default a SECRET)
     - secretKey: azurestorageaccountname
@@ -238,7 +236,6 @@ EOF
 # Deploy Apache Airflow using Helm
 # Configure an airflow_values.yaml file to change the default deployment configurations for the chart and update the container registry for the images.
 cat <<EOF > airflow_values.yaml
-
 images:
   airflow:
     repository: $MY_ACR_REGISTRY.azurecr.io/airflow
@@ -281,7 +278,7 @@ images:
     repository: $MY_ACR_REGISTRY.azurecr.io/git-sync
     tag: v4.1.0
     pullPolicy: IfNotPresent
-
+    
 # Airflow executor
 executor: "KubernetesExecutor"
 
