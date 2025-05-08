@@ -1,8 +1,10 @@
-# test 1: install python 3.6
+# test 1: install python 3.9
 
-pip install cryptography
+python3.9 -m pip install
+# pip install cryptography
+pip install cryptography ==43.0.*
 
-python3
+python
 import cryptography
 # Print the version of the cryptography package
 print(cryptography.__version__)
