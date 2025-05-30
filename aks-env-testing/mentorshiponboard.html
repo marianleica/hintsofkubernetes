@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Technical Mentee Onboarding Guide - Phase 1</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    pre, code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 4px; }
+    pre { padding: 1em; }
+    blockquote { background: #e7f3fe; border-left: 4px solid #2196F3; margin: 1em 0; padding: 0.5em 1em; }
+    h1, h2, h3 { color: #2c3e50; }
+    ul, ol { margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+  <h1>Technical Mentee Onboarding Guide - Phase 1</h1>
+
+  <h2>1. Create a GitHub Public Repository</h2>
+  <ol>
+    <li>Go to <a href="https://github.com/">GitHub</a> and sign in or create an account.</li>
+    <li>On your Dashboard page, click the <strong>New</strong> button (left pane) to create a new repository.</li>
+    <li>Enter a repository name and description, e.g. <code>msactflows</code></li>
+    <li>Set the repository visibility to <strong>Public</strong>.</li>
+    <li>Click <strong>Create repository</strong>.</li>
+    <li>Install <a href="https://git-scm.com/downloads">GIT</a> on your machine</li>
+  </ol>
+
+  <h2>2. Clone the Repository Locally</h2>
+  <p>
+    Open a terminal, go to the desired path in which to have the repo (e.g. <code>C:\dev\</code>) and run:
+  </p>
+  <pre><code>git clone https://github.com/&lt;your-github-username&gt;/&lt;your-repo&gt;.git
+cd &lt;your-repo&gt;
+</code></pre>
+
+  <h2>3. Create a README.md File</h2>
+  <ul>
+    <li>Before your first commit, create a <code>README.md</code> file to describe your project:</li>
+  </ul>
+  <pre><code>echo "# &lt;your-repo&gt;" &gt; README.md
+</code></pre>
+  <ul>
+    <li>Edit <code>README.md</code> to add more details about your project if you wish.</li>
+  </ul>
+
+  <h2>4. Make Changes and Commit</h2>
+  <ul>
+    <li>Add or modify files as needed.</li>
+    <li>Stage your changes (including <code>README.md</code>):</li>
+  </ul>
+  <pre><code>git add .
+</code></pre>
+  <ul>
+    <li>Commit your changes with a message:</li>
+  </ul>
+  <pre><code>git commit -m "Initial commit with README"
+</code></pre>
+
+  <h2>5. Push Changes to GitHub</h2>
+  <blockquote>
+    <strong>ℹ️ Info:</strong><br>
+    By default, your main branch is called <code>main</code>. If your branch is named differently, replace <code>main</code> with your branch name.
+  </blockquote>
+  <pre><code>git push origin main
+</code></pre>
+  <p><em>(Replace <code>main</code> with your branch name, if different, by default it will be <code>main</code>.)</em></p>
+  <blockquote>
+    <strong>ℹ️ Info:</strong><br>
+    You will be using your editor (VSCode) to add your technical action plans and general information.<br>
+    The git steps to add, commit, and push will be used often after you made changes.<br>
+    Once pushed, the changes will reflect in your repository.
+  </blockquote>
+
+  <h2>6. Additional Tips</h2>
+  <ul>
+    <li>Commit often with clear messages.</li>
+    <li>Use branches for new features or experiments.</li>
+    <li>Share your repository link with your mentor for feedback.</li>
+  </ul>
+
+  <h1>Happy Coding!</h1>
+</body>
+</html>
