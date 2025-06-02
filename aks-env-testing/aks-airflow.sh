@@ -86,7 +86,7 @@ az keyvault secret set --vault-name $MY_KEYVAULT_NAME --name AKS-AIRFLOW-LOGS-ST
 az keyvault secret set --vault-name $MY_KEYVAULT_NAME --name AKS-AIRFLOW-LOGS-STORAGE-ACCOUNT-KEY --value $AKS_AIRFLOW_LOGS_STORAGE_ACCOUNT_KEY
 #
 # Create an Azure Kubernetes Service (AKS) cluster
-az aks create --location $MY_LOCATION --name $MY_CLUSTER_NAME --tier standard --resource-group $MY_RESOURCE_GROUP_NAME --network-plugin azure --node-vm-size Standard_DS4_v2 --node-count 3 --auto-upgrade-channel stable --node-os-upgrade-channel NodeImage --attach-acr ${MY_ACR_REGISTRY} --enable-oidc-issuer --enable-blob-driver --enable-workload-identity --zones 1 2 3 --generate-ssh-keys --output table
+az aks create --location $MY_LOCATION --name $MY_CLUSTER_NAME --tier standard --resource-group $MY_RESOURCE_GROUP_NAME --network-plugin azure --node-vm-size Standard_DS4_v2 --node-count 1 --auto-upgrade-channel stable --node-os-upgrade-channel NodeImage --attach-acr ${MY_ACR_REGISTRY} --enable-oidc-issuer --enable-blob-driver --enable-workload-identity --zones 1 2 3 --generate-ssh-keys --output table
 # Get the OIDC issuer URL to use for the workload identity configuration using the az aks show command.
 export OIDC_URL=$(az aks show --resource-group $MY_RESOURCE_GROUP_NAME --name $MY_CLUSTER_NAME --query oidcIssuerProfile.issuerUrl --output tsv)
 #
