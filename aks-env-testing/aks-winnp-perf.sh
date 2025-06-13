@@ -54,55 +54,7 @@ echo "Install kubectl locally, if needed: az aks install-cli"
 # Set nodeName variable to the string name of the Windows node to be used in yaml
 nodeName=$(kubectl get no --no-headers | grep -i win | awk '{print $1}')
 echo $nodeName
-# Adding some workload
 
-kubectl apply -f - <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: sample
-  labels:
-    app: sample
-spec:
-  replicas: 1
-  template:
-    metadata:
-      name: sample
-      labels:
-        app: sample
-    spec:
-      nodeSelector:
-        "kubernetes.io/hostname": $nodeName
-      containers:
-      - name: sample
-        image: mcr.microsoft.com/dotnet/framework/samples:aspnetapp
-        resources:
-          limits:
-            cpu: 1
-            memory: 100M
-#          requests:
-#            cpu: 1
-#            memory: 100M
-        ports:
-          - containerPort: 80
-  selector:
-    matchLabels:
-      app: sample
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: sample
-spec:
-  type: LoadBalancer
-  ports:
-  - protocol: TCP
-    port: 80
-  selector:
-    app: sample
-EOF
-
-kubectl top nodes
 
 # Prepare HPC
 
@@ -149,6 +101,16 @@ kubectl exec hpc -it -- powershell
 
 # ACTION PLAN - Windows Performance CPU utilization
 
+# PowerShell commands to install PowerShell 7 (Core):
+# 1. Download the ZIP package:
+Start-BitsTransfer https://github.com/PowerShell/PowerShell/releases/download/v7.4.2/PowerShell-7.4.2-win-x64.zip -Destination C:\PowerShell-7.4.2-win-x64.zip
+
+# 2. Extract the ZIP to a folder, e.g. C:\pwsh742
+Expand-Archive -Path C:\PowerShell-7.4.2-win-x64.zip -DestinationPath C:\pwsh742
+
+# 3. Run PowerShell 7 from the extracted folder:
+C:\pwsh742\pwsh.exe
+
 mkdir C:\Perflogs
 cd C:\Perflogs
 
@@ -163,6 +125,42 @@ wpr -start CPU.light -filemode
 # or verbose mode use: wpr -start CPU
 
 ############ Here reproduce the issue for up to 2 minutes
+# For this test, let's apply CPU stress with https://learn.microsoft.com/en-us/sysinternals/downloads/cpustres
+# Download cpustres.exe from https://learn.microsoft.com/en-us/sysinternals/downloads/cpustres
+# Start-BitsTransfer https://download.sysinternals.com/files/CPUSTRES.zip -Destination C:\
+# Expand-Archive -Path C:\CPUSTRES.zip
+# cd C:\CPUSTRES
+# and then run it:
+#.\CPUSTRES.EXE -c 4 -t 120
+
+# PowerShell: CPU stress script using for loops (corrected for Bash variable expansion issues)
+@'
+$NumberOfLogicalProcessors = (Get-WmiObject win32_processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
+
+$jobs = @()
+for ($core = 1; $core -le $NumberOfLogicalProcessors; $core++) {
+    $jobs += Start-Job -ScriptBlock {
+        $result = 1
+        for ($loopnumber = 1; $loopnumber -le 100000; $loopnumber++) {
+            $result = 1
+            for ($loopnumber1 = 1; $loopnumber1 -le 1000; $loopnumber1++) {
+                $result = 1
+                for ($number = 1; $number -le 100; $number++) {
+                    $result = $result * $number
+                }
+            }
+        }
+        $result
+    }
+}
+
+Write-Host "CPU stress started on $NumberOfLogicalProcessors cores. Press Enter to stop..."
+Read-Host
+
+$jobs | ForEach-Object { Stop-Job -Id $_.Id }
+'@ | Set-Content -Path C:\myscript.ps1
+
+kubectl top nodes
 
 # <wait maximum of 2 mins and then stop>
 wpr -stop p.etl -skipPdbGen
